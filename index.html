@@ -3,29 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Au bonheur des Anges - Bon de commande</title>
+    <title>Au bonheur des Anges - Commander</title>
     <link rel="icon" href="logo.jpg">
-    <!-- Chargement de la bibliothèque Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 70px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 80px; display: flex; flex-direction: column; align-items: center; }
         .app-header { background-color: #ffffff; width: 100%; text-align: center; padding: 12px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .app-header h1 { font-size: 16px; margin: 0; color: #9b59b6; font-weight: 600; }
         .app-view { width: 100%; max-width: 480px; box-sizing: border-box; padding: 16px; }
-        .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 12px; padding: 20px 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(155, 89, 182, 0.05); }
-        .logo-container { text-align: center; margin-bottom: 15px; }
-        .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #7d7f82; margin: 0 0 20px 0; font-weight: 700; border-bottom: 1px solid #fbeef7; padding-bottom: 8px; }
-        .form-field { margin-bottom: 24px; }
-        .form-field label { display: block; font-size: 13px; font-weight: 600; color: #3c4043; margin-bottom: 4px; }
-        .form-field input[type="text"], .form-field input[type="number"], .form-field input[type="date"] { width: 100%; padding: 8px 0; border: none; border-bottom: 2px solid #f3d6ed; background-color: transparent; color: #202124; font-size: 15px; box-sizing: border-box; }
-        .form-field input:focus { border-bottom-color: #9b59b6; outline: none; }
-        .checkbox-group { border-bottom: 1px solid #fbeef7; margin-bottom: 24px; }
-        .form-field-checkbox { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
-        .form-field-checkbox label { font-size: 13px; font-weight: 600; color: #3c4043; }
-        .form-field-checkbox input[type="checkbox"] { width: 20px; height: 20px; accent-color: #9b59b6; cursor: pointer; }
-        .btn-save { width: 100%; padding: 14px; background-color: #9b59b6; color: white; border: none; border-radius: 24px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(155, 89, 182, 0.2); transition: background-color 0.2s; }
-        .btn-save:hover { background-color: #8e44ad; }
-        .btn-save:disabled { background-color: #ccc; cursor: not-allowed; }
+        .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(155, 89, 182, 0.05); width: 100%; box-sizing: border-box; }
+        .section-title { font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; color: #9b59b6; margin: 0 0 16px 0; font-weight: 700; border-bottom: 2px solid #fbeef7; padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #5f6368; margin-bottom: 6px; }
+        .form-control { border: 1px solid #f3d6ed; border-radius: 8px; padding: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; background: #fafafa; }
+        .form-control:focus { border-color: #9b59b6; background: #ffffff; }
+        textarea.form-control { resize: vertical; min-height: 70px; }
+
+        .form-row { display: flex; gap: 12px; }
+        .form-row .form-group { flex: 1; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 8px; cursor: pointer; user-select: none; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: #9b59b6; cursor: pointer; }
+        .checkbox-group label { font-size: 14px; font-weight: 600; color: #202124; margin: 0; cursor: pointer; }
+
+        .total-display { background-color: #fbeef7; border-radius: 8px; padding: 12px; text-align: right; font-size: 15px; font-weight: 700; color: #9b59b6; margin-top: 8px; margin-bottom: 16px; }
+
+        .btn-submit { background-color: #9b59b6; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3); transition: background-color 0.2s; }
+        .btn-submit:active { background-color: #8e44ad; }
+
+        .alert-success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: none; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #dadce0; z-index: 1000; }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #5f6368; text-decoration: none; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #9b59b6; font-weight: 600; }
@@ -38,50 +45,54 @@
 </div>
 
 <div class="app-view">
-    <div class="app-card">
-        <div class="logo-container">
-            <img src="logo.jpg" alt="Logo" width="185" height="164">
-        </div>
-        
-        <h2 class="section-title">Bon de commande</h2>
-        
-        <div class="form-field">
-            <label for="newName">Nom</label>
-            <input type="text" id="newName" placeholder="Ex. : Mathieu" maxlength="10" required>
-        </div>
-        
-        <div class="form-field">
-            <label for="newAantal">Quantité</label>
-            <input type="number" id="newAantal" placeholder="0" min="1" required>
-        </div>
+    <div id="alertSuccess" class="alert-success">
+        &check; Commande enregistrée avec succès dans le cloud !
+    </div>
 
-        <div class="form-field">
-            <label for="newPrijs">Prix unitaire (€)</label>
-            <input type="number" id="newPrijs" placeholder="0.00" step="0.01" min="0" required>
-        </div>
-        
-        <div class="form-field">
-            <label for="newText">Commande</label>
-            <input type="text" id="newText" placeholder="Entrez les détails de la commande..." required>
-        </div>
-        
-        <div class="form-field">
-            <label for="newDatum">Date</label>
-            <input type="date" id="newDatum">
-        </div>
-        
-        <div class="checkbox-group">
-            <div class="form-field-checkbox">
-                <label for="newBetaald">Payé</label>
-                <input type="checkbox" id="newBetaald">
+    <div class="app-card">
+        <h2 class="section-title">Nouvelle Commande</h2>
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="naam">Nom du client *</label>
+                <input type="text" id="naam" class="form-control" placeholder="ex: Marie Dupont" required>
             </div>
-            <div class="form-field-checkbox">
-                <label for="newTerugbetaald">Remboursé</label>
-                <input type="checkbox" id="newTerugbetaald">
+
+            <div class="form-group">
+                <label for="text">Description de la commande *</label>
+                <textarea id="text" class="form-control" placeholder="ex: Gâteau vanille 8 personnes avec déco ange" required></textarea>
             </div>
-        </div>
-        
-        <button class="btn-save" id="saveBtn" onclick="addItem()">Ajouter la commande</button>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="aantal">Quantité *</label>
+                    <input type="number" id="aantal" class="form-control" value="1" min="1" required oninput="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label for="prijs">Prix unitaire (€) *</label>
+                    <input type="number" step="0.01" id="prijs" class="form-control" placeholder="0.00" required oninput="calculateTotal()">
+                </div>
+            </div>
+
+            <div class="total-display">
+                Total : € <span id="totalAmount">0.00</span>
+            </div>
+
+            <div class="form-group">
+                <label for="datum">Date de livraison / commande *</label>
+                <input type="date" id="datum" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group" onclick="toggleCheckbox('betaald')">
+                    <input type="checkbox" id="betaald">
+                    <label for="betaald">Commande déjà payée</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Enregistrer la commande
+            </button>
+        </form>
     </div>
 </div>
 
@@ -92,46 +103,95 @@
     <a href="infoapp.html" class="nav-item">ℹ️<br><span>INFO</span></a>
 </div>
 
-<script>
-    const SUPABASE_URL = "https://szvfvmloybxptvwcwulu.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6dmZ2bWxveWJ4cHR2d2N3dWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzExMDcsImV4cCI6MjA5OTk0NzEwN30.Iz1yyC6id1gMUmgRPPQWVB0Bd8jW7uUb3I5_idsNTyQ";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- Firebase Realtime Database Integration -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-
-    async function addItem() {
-        const naam = document.getElementById("newName").value;
-        const aantal = parseInt(document.getElementById("newAantal").value) || 0;
-        const prijs = parseFloat(document.getElementById("newPrijs").value) || 0;
-        const text = document.getElementById("newText").value;
-        const datum = document.getElementById("newDatum").value;
-        const betaald = document.getElementById("newBetaald").checked;
-        const terugbetaald = document.getElementById("newTerugbetaald").checked;
-
-        if (!naam || !text || aantal <= 0) {
-            alert("Veuillez remplir correctement le nom, la quantité et la commande.");
-            return;
-        }
-
-        document.getElementById("saveBtn").disabled = true;
-        document.getElementById("saveBtn").textContent = "Enregistrement en cours...";
-
-        const { error } = await _supabase
-            .from('items')
-            .insert([{ naam, aantal, prijs, text, betaald, terugbetaald, datum }]);
-
-        if (error) {
-            alert("Erreur lors de l'enregistrement : " + error.message + "\n\nAstuce : Si vous voyez 'Failed to fetch', vérifiez que votre clé API Supabase (anon/public) est correcte.");
-            document.getElementById("saveBtn").disabled = false;
-            document.getElementById("saveBtn").textContent = "Ajouter la commande";
-        } else {
-            alert("Commande enregistrée avec succès en ligne !");
-            window.location.href = "list.html";
-        }
-    }
-
-    window.onload = function() {
-        document.getElementById("newDatum").value = new Date().toISOString().split('T')[0];
+    // ✅ Jouw Firebase configuratie
+    const firebaseConfig = {
+        apiKey: "JOUW_API_KEY", // Vul in via Firebase Console
+        authDomain: "cloudstockage-b1580.firebaseapp.com",
+        databaseURL: "https://cloudstockage-b1580-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "cloudstockage-b1580",
+        storageBucket: "cloudstockage-b1580.appspot.com",
+        messagingSenderId: "JOUW_SENDER_ID",
+        appId: "JOUW_APP_ID"
     };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Standaard datum instellen op vandaag
+    document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("datum").value = today;
+    });
+
+    // Bereken het totaal live
+    window.calculateTotal = function() {
+        const aantal = parseInt(document.getElementById("aantal").value) || 0;
+        const prijs = parseFloat(document.getElementById("prijs").value) || 0;
+        const total = (aantal * prijs).toFixed(2);
+        document.getElementById("totalAmount").textContent = total;
+    };
+
+    window.toggleCheckbox = function(id) {
+        const checkbox = document.getElementById(id);
+        if (event.target !== checkbox) {
+            checkbox.checked = !checkbox.checked;
+        }
+    };
+
+    // Formulier verzenden naar Firebase
+    const form = document.getElementById("orderForm");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enregistrement...";
+
+        const naam = document.getElementById("naam").value.trim();
+        const text = document.getElementById("text").value.trim();
+        const aantal = parseInt(document.getElementById("aantal").value) || 1;
+        const prijs = parseFloat(document.getElementById("prijs").value) || 0;
+        const datum = document.getElementById("datum").value;
+        const betaald = document.getElementById("betaald").checked;
+
+        const newOrder = {
+            naam: naam,
+            text: text,
+            aantal: aantal,
+            prijs: prijs,
+            datum: datum,
+            betaald: betaald,
+            terugbetaald: false,
+            timestamp: Date.now()
+        };
+
+        try {
+            const itemsRef = ref(db, 'items');
+            const newRef = push(itemsRef);
+            await set(newRef, newOrder);
+
+            // Succesweergave
+            const alert = document.getElementById("alertSuccess");
+            alert.style.display = "block";
+            setTimeout(() => { alert.style.display = "none"; }, 4000);
+
+            // Formulier resetten
+            form.reset();
+            document.getElementById("datum").value = new Date().toISOString().split('T')[0];
+            document.getElementById("totalAmount").textContent = "0.00";
+
+        } catch (error) {
+            alert("Erreur lors de l'enregistrement : " + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enregistrer la commande";
+        }
+    });
 </script>
 </body>
 </html>
