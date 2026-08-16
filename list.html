@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Au bonheur des Anges - Liste en direct</title>
+    <title>Au bonheur des Anges - Liste PDF</title>
     <link rel="icon" href="logo.jpg">
-    <!-- Chargement de la bibliothèque Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Script pour la génération native et fiable de PDF -->
+    <!-- Script voor de generatie van PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 70px; display: flex; flex-direction: column; align-items: center; }
@@ -51,9 +49,9 @@
     <div class="actions-bar">
         <div class="search-card">
             <span>🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom ou commande..." onkeyup="filterItems()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom ou commande..." onkeyup="window.filterItems()">
         </div>
-        <button class="btn-pdf" id="pdfBtn" onclick="exportToPDF()">
+        <button class="btn-pdf" id="pdfBtn" onclick="window.exportToPDF()">
             <span>📄</span> PDF
         </button>
     </div>
@@ -70,43 +68,71 @@
 
 <div class="bottom-nav">
     <a href="index.html" class="nav-item">📝<br><span>COMMANDER</span></a>
-    <a href="list.html" class="nav-item active">📊<br><span>LISTE</span></a>
-    <a href="listcommand.html" class="nav-item">📋<br><span>LISTE PDF</span></a>
+    <a href="list.html" class="nav-item">📊<br><span>LISTE</span></a>
+    <a href="listcommand.html" class="nav-item active">📋<br><span>LISTE PDF</span></a>
     <a href="infoapp.html" class="nav-item">ℹ️<br><span>INFO</span></a>
 </div>
 
-<script>
-    const SUPABASE_URL = "https://szvfvmloybxptvwcwulu.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6dmZ2bWxveWJ4cHR2d2N3dWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzExMDcsImV4cCI6MjA5OTk0NzEwN30.Iz1yyC6id1gMUmgRPPQWVB0Bd8jW7uUb3I5_idsNTyQ";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- Firebase Realtime Database Integration -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // ✅ Jouw Firebase configuratie
+    const firebaseConfig = {
+        apiKey: "JOUW_API_KEY", // Vul in via Firebase Console
+        authDomain: "cloudstockage-b1580.firebaseapp.com",
+        databaseURL: "https://cloudstockage-b1580-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "cloudstockage-b1580",
+        storageBucket: "cloudstockage-b1580.appspot.com",
+        messagingSenderId: "JOUW_SENDER_ID",
+        appId: "JOUW_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     let allItems = [];
 
-    async function loadItems() {
-        document.getElementById("loadingText").style.display = "block";
-        
-        const { data, error } = await _supabase
-            .from('items')
-            .select('*')
-            .order('id', { ascending: false });
+    // Realtime Luisteraar naar het knooppunt 'items'
+    const itemsRef = ref(db, 'items');
+    onValue(itemsRef, (snapshot) => {
+        const loadingText = document.getElementById("loadingText");
+        if (loadingText) loadingText.style.display = "none";
 
-        document.getElementById("loadingText").style.display = "none";
-
-        if (error) {
-            alert("Erreur lors de la récupération : " + error.message + "\n\nAstuce : Si vous voyez 'Failed to fetch', récupérez la clé officielle 'anon/public' depuis votre tableau de bord Supabase.");
-            return;
+        const data = snapshot.val();
+        if (!data) {
+            allItems = [];
+        } else {
+            // Converteren van object naar array met unieke ID's
+            allItems = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).reverse(); // Nieuwste bovenaan
         }
 
-        allItems = data || [];
-        filterItems();
-    }
+        window.filterItems();
+    }, (error) => {
+        const loadingText = document.getElementById("loadingText");
+        if (loadingText) loadingText.textContent = "Erreur : " + error.message;
+    });
+
+    // Zoekfilter op naam en bestelling
+    window.filterItems = function() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const filtered = allItems.filter(item => {
+            return (item.naam || '').toLowerCase().includes(query) || 
+                   (item.text || '').toLowerCase().includes(query);
+        });
+        renderList(filtered);
+    };
 
     function renderList(items) {
         const list = document.getElementById("itemsList");
         const countBadge = document.getElementById("orderCount");
         if (!list) return;
-        
-        list.innerHTML = ''; 
+
+        list.innerHTML = '';
         countBadge.textContent = items.length;
 
         if (items.length === 0) {
@@ -117,10 +143,10 @@
         items.forEach((item) => {
             const li = document.createElement("li");
             li.className = 'list-item';
-            
+
             const paidClass = item.betaald ? 'status-paid' : 'status-unpaid';
             const paidText = item.betaald ? 'Payé' : 'Non Payé';
-            
+
             const prijsPerStuk = parseFloat(item.prijs) || 0;
             const totaalBedrag = ((parseInt(item.aantal) || 0) * prijsPerStuk).toFixed(2);
 
@@ -131,9 +157,9 @@
 
             li.innerHTML = `
                 <div class="item-main">
-                    <div class="item-title">${item.naam || 'Inconnu'}</div>
+                    <div class="item-title">${escapeHtml(item.naam || 'Inconnu')}</div>
                     <div class="item-details">
-                        <span><strong>${item.text || 'Pas de description'}</strong></span>
+                        <span><strong>${escapeHtml(item.text || 'Pas de description')}</strong></span>
                         <span>(${item.aantal || 0}x &bull; €${prijsPerStuk.toFixed(2)})</span>
                         <span style="color: #9b59b6; font-weight: bold;">Total : €${totaalBedrag}</span>
                         <span>&bull; ${item.datum || 'N/A'}</span>
@@ -142,84 +168,76 @@
                     </div>
                 </div>
                 <div class="item-actions">
-                    <button class="btn-icon" onclick="editItem(${item.id})">Modifier</button>
-                    <button class="btn-icon btn-icon-delete" onclick="deleteItem(${item.id})">Supprimer</button>
+                    <button class="btn-icon" onclick="window.editItem('${item.id}')">Modifier</button>
+                    <button class="btn-icon btn-icon-delete" onclick="window.deleteItem('${item.id}')">Supprimer</button>
                 </div>
             `;
             list.appendChild(li);
         });
     }
 
-    function filterItems() {
-        const query = document.getElementById("searchInput").value.toLowerCase();
-        const filtered = allItems.filter(item => {
-            return (item.naam || '').toLowerCase().includes(query) || 
-                   (item.text || '').toLowerCase().includes(query);
-        });
-        renderList(filtered);
-    }
-
-    async function deleteItem(id) {
+    // Bestelling verwijderen uit Realtime DB
+    window.deleteItem = async function(id) {
         if (confirm("Voulez-vous vraiment supprimer définitivement cette commande du cloud ?")) {
-            const { error } = await _supabase.from('items').delete().eq('id', id);
-            if (error) {
+            try {
+                const itemRef = ref(db, `items/${id}`);
+                await remove(itemRef);
+            } catch (error) {
                 alert("Erreur lors de la suppression : " + error.message);
-            } else {
-                loadItems();
             }
         }
-    }
+    };
 
-    async function editItem(id) {
+    // Bestelling bewerken
+    window.editItem = async function(id) {
         const item = allItems.find(i => i.id === id);
         if (!item) return;
-        
+
         const resName = prompt("Nom :", item.naam);
         const newName = (resName === null || resName.trim() === "") ? item.naam : resName;
-        
+
         const resAantal = prompt("Quantité :", item.aantal);
         const newAantal = (resAantal === null || resAantal.trim() === "") ? item.aantal : resAantal;
-        
+
         const resPrijs = prompt("Prix unitaire (€) :", item.prijs);
         const newPrijs = (resPrijs === null || resPrijs.trim() === "") ? item.prijs : resPrijs;
-        
+
         const resText = prompt("Commande :", item.text);
         const newText = (resText === null || resText.trim() === "") ? item.text : resText;
-        
+
         const resDatum = prompt("Date (AAAA-MM-JJ) :", item.datum);
         const newDatum = (resDatum === null || resDatum.trim() === "") ? item.datum : resDatum;
-        
+
         const newBetaald = confirm("Marquer comme payée ? (Ok = Oui, Annuler = Non)");
         const newTerugbetaald = confirm("Marquer comme remboursée ? (Ok = Oui, Annuler = Non)");
 
-        const updatedData = { 
-            naam: newName, 
-            aantal: parseInt(newAantal) || 0, 
-            prijs: parseFloat(newPrijs) || 0, 
-            text: newText, 
-            datum: newDatum, 
+        const updatedData = {
+            naam: newName,
+            aantal: parseInt(newAantal) || 0,
+            prijs: parseFloat(newPrijs) || 0,
+            text: newText,
+            datum: newDatum,
             betaald: newBetaald,
-            terugbetaald: newTerugbetaald 
+            terugbetaald: newTerugbetaald
         };
 
-        const { error } = await _supabase.from('items').update(updatedData).eq('id', id);
-        
-        if (error) {
+        try {
+            const itemRef = ref(db, `items/${id}`);
+            await update(itemRef, updatedData);
+        } catch (error) {
             alert("Erreur lors de la mise à jour : " + error.message);
-        } else {
-            loadItems();
         }
-    }
+    };
 
-    // Fonction d'exportation PDF via html2pdf
-    function exportToPDF() {
+    // Exportatie naar PDF via html2pdf
+    window.exportToPDF = function() {
         const element = document.getElementById('pdfContent');
         const button = document.getElementById('pdfBtn');
-        
+
         button.textContent = "Génération...";
         button.disabled = true;
 
-        // Cacher temporairement les boutons d'édition pour le PDF
+        // Verberg de knoppen tijdens het maken van de PDF
         element.classList.add('pdf-hide-actions');
 
         const options = {
@@ -240,9 +258,13 @@
             button.innerHTML = "<span>📄</span> PDF";
             button.disabled = false;
         });
-    }
+    };
 
-    window.onload = loadItems;
+    // Helper om HTML injection te voorkomen
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
 </script>
 </body>
 </html>
