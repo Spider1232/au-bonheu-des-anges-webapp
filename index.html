@@ -17,7 +17,6 @@
         .form-group label { font-size: 13px; font-weight: 600; color: #5f6368; margin-bottom: 6px; }
         .form-control { border: 1px solid #f3d6ed; border-radius: 8px; padding: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; background: #fafafa; }
         .form-control:focus { border-color: #9b59b6; background: #ffffff; }
-        textarea.form-control { resize: vertical; min-height: 70px; }
 
         .form-row { display: flex; gap: 12px; }
         .form-row .form-group { flex: 1; }
@@ -53,13 +52,48 @@
         <h2 class="section-title">Nouvelle Commande</h2>
         <form id="orderForm">
             <div class="form-group">
-                <label for="naam">Nom du client * </label>
+                <label for="naam">Nom du client *</label>
                 <input type="text" id="naam" class="form-control" placeholder="ex: Marie Dupont" required>
             </div>
 
+            <!-- Predefined Products Select Dropdown -->
             <div class="form-group">
-                <label for="text">Description de la commande *</label>
-                <textarea id="text" class="form-control" placeholder="ex: Gâteau vanille 8 personnes avec déco ange" required></textarea>
+                <label for="text">Choisir un produit prédéfini *</label>
+                <select id="text" class="form-control" required onchange="window.updateDefaultPrice()">
+    <option value="" data-price="">-- Sélectionner un produit --</option>
+    <option value="Tapis souris" data-price="10.00">Tapis souris - 10,00 €</option>
+    <option value="Photo sur cristal 8x6x2 cm" data-price="15.00">Photo sur cristal 8x6x2 cm - 15,00 €</option>
+    <option value="Mug" data-price="8.00">Mug - 8,00 €</option>
+    <option value="Mug couple (2)" data-price="15.00">Mug couple (2) - 15,00 €</option>
+    <option value="Puzzle A4 + boîte métal" data-price="13.00">Puzzle A4 + boîte métal - 13,00 €</option>
+    <option value="Stylo" data-price="3.50">Stylo - 3,50 €</option>
+    <option value="Mug métal 450 ml" data-price="10.00">Mug métal 450 ml - 10,00 €</option>
+    <option value="Bidon métal 750 ml" data-price="12.00">Bidon métal 750 ml - 12,00 €</option>
+    <option value="Bouteille métal jaune-vert 500 ml" data-price="15.00">Bouteille métal jaune-vert 500 ml - 15,00 €</option>
+    <option value="Sac ordi 15 pouces" data-price="20.00">Sac ordi 15 pouces - 20,00 €</option>
+    <option value="Petite ardoise" data-price="15.00">Petite ardoise - 15,00 €</option>
+    <option value="Marbre 15x15" data-price="30.00">Marbre 15x15 - 30,00 €</option>
+    <option value="Grande ardoise" data-price="30.00">Grande ardoise - 30,00 €</option>
+    <option value="Coussin" data-price="12.00">Coussin - 12,00 €</option>
+    <option value="Coussin 40x40 cm" data-price="12.00">Coussin 40x40 cm - 12,00 €</option>
+    <option value="Assiette décorative céramique" data-price="20.00">Assiette décorative céramique - 20,00 €</option>
+    <option value="Réveil multicolore" data-price="15.00">Réveil multicolore - 15,00 €</option>
+    <option value="Réveil 2 photos perso" data-price="25.00">Réveil 2 photos perso - 25,00 €</option>
+    <option value="Coque GSM avec photo perso" data-price="20.00">Coque GSM avec photo perso - 20,00 €</option>
+    <option value="Parchemin A3" data-price="15.00">Parchemin A3 - 15,00 €</option>
+    <option value="Sac à courses personnalisé" data-price="3.00">Sac à courses personnalisé - 3,00 €</option>
+    <option value="Ours en peluche perso" data-price="12.00">Ours en peluche perso - 12,00 €</option>
+    <option value="Statuette d'après photo perso" data-price="15.00">Statuette d'après photo perso - 15,00 €</option>
+    <option value="Plaque souvenir d'après photo" data-price="35.00">Plaque souvenir d'après photo - 35,00 €</option>
+    <option value="Vase (hauteur 20 cm)" data-price="15.00">Vase (hauteur 20 cm) - 15,00 €</option>
+    <option value="Vase de table 15-18 cm" data-price="10.00">Vase de table 15-18 cm - 10,00 €</option>
+    <option value="Porte-clés" data-price="10.00">Porte-clés - 10,00 €</option>
+    <option value="Plat à fruits" data-price="12.00">Plat à fruits - 12,00 €</option>
+    <option value="Boule de Noël 6 cm" data-price="3.50">Boule de Noël 6 cm - 3,50 €</option>
+    <option value="Boule de Noël 8 cm" data-price="5.00">Boule de Noël 8 cm - 5,00 €</option>
+    <option value="Déco de Noël" data-price="6.00">Déco de Noël - 6,00 €</option>
+    <option value="Chaussette de Noël" data-price="10.00">Chaussette de Noël - 10,00 €</option>
+                </select>
             </div>
 
             <div class="form-row">
@@ -128,6 +162,18 @@
         document.getElementById("datum").value = today;
     });
 
+    // Vul automatisch de prijs in wanneer een product gekozen wordt
+    window.updateDefaultPrice = function() {
+        const selectElement = document.getElementById("text");
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const defaultPrice = selectedOption.getAttribute("data-price");
+        
+        if (defaultPrice !== null && defaultPrice !== "") {
+            document.getElementById("prijs").value = defaultPrice;
+            window.calculateTotal();
+        }
+    };
+
     // Bereken het totaal live
     window.calculateTotal = function() {
         const aantal = parseInt(document.getElementById("aantal").value) || 0;
@@ -153,7 +199,7 @@
         submitBtn.textContent = "Enregistrement...";
 
         const naam = document.getElementById("naam").value.trim();
-        const text = document.getElementById("text").value.trim();
+        const text = document.getElementById("text").value; // Gekozen product uit select
         const aantal = parseInt(document.getElementById("aantal").value) || 1;
         const prijs = parseFloat(document.getElementById("prijs").value) || 0;
         const datum = document.getElementById("datum").value;
