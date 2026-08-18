@@ -11,7 +11,7 @@
         .app-header h1 { font-size: 16px; margin: 0; color: #9b59b6; font-weight: 600; }
         .app-view { width: 100%; max-width: 600px; box-sizing: border-box; padding: 16px; }
         .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(155, 89, 182, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 16px; }
-        .section-title { font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; color: #9b59b6; margin: 0 0 16px 0; font-weight: 700; border-bottom: 2px solid #fbeef7; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; color: #9b59b6; margin: 0 0 16px 0; font-weight: 700; border-bottom: 2px solid #fbeef7; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         
         .form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
         .form-group label { font-size: 13px; font-weight: 600; color: #5f6368; margin-bottom: 6px; }
@@ -22,7 +22,14 @@
         .btn-submit:active { background-color: #8e44ad; }
         
         .btn-cancel { background-color: #95a5a6; color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px; display: none; }
-        .btn-seed { background-color: #3498db; color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        
+        /* Tool Knoppen */
+        .tools-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; background-color: #fbf5fa; padding: 12px; border-radius: 8px; border: 1px solid #f3d6ed; }
+        .btn-tool { border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s; }
+        .btn-tool:hover { opacity: 0.9; }
+        .btn-seed { background-color: #3498db; color: white; }
+        .btn-export { background-color: #2ecc71; color: white; }
+        .btn-import { background-color: #e67e22; color: white; }
 
         .alert-success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: none; }
 
@@ -37,7 +44,7 @@
         td { padding: 10px 8px; border-bottom: 1px solid #f3d6ed; vertical-align: middle; }
         tr:hover { background-color: #fafafa; }
 
-        .badge-cat { background-color: #f3d6ed; color: #9b59b6; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; whitespace: nowrap; }
+        .badge-cat { background-color: #f3d6ed; color: #9b59b6; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
 
         .btn-action { border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
         .btn-edit { background-color: #f39c12; color: white; margin-right: 4px; }
@@ -106,9 +113,21 @@
 
     <!-- Products Table Card -->
     <div class="app-card">
-        <div class="section-title">
+        <h2 class="section-title">
             <span>Tous les Produits</span>
-            <button class="btn-seed" onclick="window.seedDefaultProducts()">📥 Importer produits de base</button>
+        </h2>
+
+        <!-- Backup / Restore / Seed Tools Bar -->
+        <div class="tools-bar">
+
+            <button class="btn-tool btn-export" onclick="window.exportToJson()">
+                💾 Exporter JSON (Backup)
+            </button>
+            <button class="btn-tool btn-import" onclick="document.getElementById('importFileInput').click()">
+                📂 Importer JSON
+            </button>
+            <!-- Hidden file input for JSON import -->
+            <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="window.importFromJson(event)">
         </div>
 
         <div class="filter-container">
@@ -150,7 +169,7 @@
     <a href="infoapp.html" class="nav-item">ℹ️<br><span>INFO</span></a>
 </div>
 
-<!-- Firebase Module -->
+<!-- Firebase Module Script -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -170,7 +189,7 @@
 
     let allProductsData = {};
 
-    // Connection Status
+    // 1. DATABASE STATUS LISTENER
     const connectedRef = ref(db, ".info/connected");
     onValue(connectedRef, (snap) => {
         const statusDot = document.getElementById("statusDot");
@@ -187,7 +206,7 @@
         }
     });
 
-    // Fetch and display products in table
+    // 2. LIVE PRODUCTS LISTENER FROM FIREBASE
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -198,7 +217,7 @@
         window.renderProductsTable();
     });
 
-    // Render table with category filter
+    // 3. RENDER TABLE WITH FILTERING & SORTING
     window.renderProductsTable = function() {
         const tbody = document.getElementById("productsTableBody");
         const selectedCategory = document.getElementById("filterCategory").value;
@@ -207,7 +226,7 @@
         const productKeys = Object.keys(allProductsData);
 
         if (productKeys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #7f8c8d; padding: 15px;">Aucun produit dans la base. Cliquez sur <strong>"Importer produits de base"</strong> ci-dessus !</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #7f8c8d; padding: 15px;">Aucun produit dans la base. Cliquez sur <strong>"Importer base"</strong> ou <strong>"Importer JSON"</strong> ci-dessus !</td></tr>`;
             return;
         }
 
@@ -216,7 +235,7 @@
             return (allProductsData[key].categorie || "Autre") === selectedCategory;
         });
 
-        // Sorteer op Categorie en dan op Naam
+        // Sort by Category and then Name
         filteredKeys.sort((a, b) => {
             const catA = (allProductsData[a].categorie || "").toLowerCase();
             const catB = (allProductsData[b].categorie || "").toLowerCase();
@@ -254,7 +273,97 @@
         });
     };
 
-    // Standaardlijst in één keer importeren in Firebase
+    // 4. EXPORT TO JSON FILE (DIRECT DOWNLOAD)
+    window.exportToJson = function() {
+        const keys = Object.keys(allProductsData);
+        if (keys.length === 0) {
+            alert("Aucun produit à exporter !");
+            return;
+        }
+
+        // Clean array structure for export
+        const exportArray = keys.map(key => ({
+            categorie: allProductsData[key].categorie || "Autre",
+            naam: allProductsData[key].naam || "",
+            prijs: parseFloat(allProductsData[key].prijs || 0)
+        }));
+
+        const jsonString = JSON.stringify(exportArray, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const today = new Date().toISOString().split('T')[0];
+        const fileName = `produits_backup_${today}.json`;
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
+
+        showMessage("Backup JSON téléchargé avec succès !");
+    };
+
+    // 5. IMPORT FROM JSON FILE TO FIREBASE
+    window.importFromJson = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                let productsToImport = [];
+
+                if (Array.isArray(importedData)) {
+                    productsToImport = importedData;
+                } else if (typeof importedData === 'object' && importedData !== null) {
+                    productsToImport = Object.values(importedData);
+                } else {
+                    throw new Error("Le fichier ne contient pas une liste valide de produits.");
+                }
+
+                if (productsToImport.length === 0) {
+                    alert("Le fichier JSON est vide.");
+                    return;
+                }
+
+                const overwrite = confirm(
+                    `Le fichier contient ${productsToImport.length} produit(s).\n\n` +
+                    "Voulez-vous ÉCRASER tous les produits existants dans la base de données ?\n\n" +
+                    "• Cliquez sur OK pour ÉCRASER toute la base.\n" +
+                    "• Cliquez sur Annuler pour AJOUTER (fusionner) ces produits aux existants."
+                );
+
+                if (overwrite) {
+                    await remove(productsRef);
+                }
+
+                for (let prod of productsToImport) {
+                    const newRef = push(productsRef);
+                    await set(newRef, {
+                        categorie: prod.categorie || "Autre",
+                        naam: prod.naam || "Produit sans nom",
+                        prijs: parseFloat(prod.prijs || 0),
+                        timestamp: Date.now()
+                    });
+                }
+
+                showMessage(`${productsToImport.length} produit(s) importé(s) avec succès !`);
+
+            } catch (err) {
+                alert("Erreur lors de l'importation : " + err.message);
+            } finally {
+                event.target.value = ""; // Reset input field
+            }
+        };
+
+        reader.readAsText(file);
+    };
+
+    // 6. SEED DEFAULT PRODUCTS TO FIREBASE
     window.seedDefaultProducts = async function() {
         if (!confirm("Voulez-vous charger la liste de tous les produits par défaut dans la base de données ?")) {
             return;
@@ -326,7 +435,7 @@
         }
     };
 
-    // Form Submit (Add or Edit)
+    // 7. FORM SUBMIT (ADD OR UPDATE)
     const form = document.getElementById("productForm");
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -341,7 +450,6 @@
 
         try {
             if (editId) {
-                // UPDATE
                 const itemRef = ref(db, `products/${editId}`);
                 await update(itemRef, {
                     categorie: categorie,
@@ -350,7 +458,6 @@
                 });
                 showMessage("Produit mis à jour avec succès !");
             } else {
-                // ADD
                 const newRef = push(productsRef);
                 await set(newRef, {
                     categorie: categorie,
@@ -369,7 +476,7 @@
         }
     });
 
-    // Set form to Edit mode
+    // 8. EDIT PRODUCT
     window.editProduct = function(id, naam, prijs, categorie) {
         document.getElementById("editProductId").value = id;
         document.getElementById("categorie").value = categorie;
@@ -383,7 +490,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Delete Product
+    // 9. DELETE PRODUCT
     window.deleteProduct = async function(id) {
         if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
             try {
@@ -396,7 +503,7 @@
         }
     };
 
-    // Reset Form
+    // 10. RESET FORM
     window.resetForm = function() {
         form.reset();
         document.getElementById("editProductId").value = "";
