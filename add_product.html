@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr-BE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Au bonheur des Anges - Gérer les Produits</title>
+    <link rel="icon" href="logo.jpg">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 90px; display: flex; flex-direction: column; align-items: center; }
+        .app-header { background-color: #ffffff; width: 100%; text-align: center; padding: 12px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .app-header h1 { font-size: 16px; margin: 0; color: #9b59b6; font-weight: 600; }
+        .app-view { width: 100%; max-width: 600px; box-sizing: border-box; padding: 16px; }
+        .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(155, 89, 182, 0.05); width: 100%; box-sizing: border-box; margin-bottom: 16px; }
+        .section-title { font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; color: #9b59b6; margin: 0 0 16px 0; font-weight: 700; border-bottom: 2px solid #fbeef7; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #5f6368; margin-bottom: 6px; }
+        .form-control { border: 1px solid #f3d6ed; border-radius: 8px; padding: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; background: #fafafa; }
+        .form-control:focus { border-color: #9b59b6; background: #ffffff; }
+
+        .btn-submit { background-color: #9b59b6; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3); transition: background-color 0.2s; }
+        .btn-submit:active { background-color: #8e44ad; }
+        
+        .btn-cancel { background-color: #95a5a6; color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px; display: none; }
+        .btn-seed { background-color: #3498db; color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+        .alert-success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: none; }
+
+        /* Filter Controls */
+        .filter-container { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
+        .filter-container label { font-size: 12px; font-weight: 600; color: #5f6368; }
+
+        /* Table Styling */
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { background-color: #fbeef7; color: #9b59b6; font-weight: 700; padding: 10px 8px; border-bottom: 2px solid #f3d6ed; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f3d6ed; vertical-align: middle; }
+        tr:hover { background-color: #fafafa; }
+
+        .badge-cat { background-color: #f3d6ed; color: #9b59b6; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; whitespace: nowrap; }
+
+        .btn-action { border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-edit { background-color: #f39c12; color: white; margin-right: 4px; }
+        .btn-delete { background-color: #e74c3c; color: white; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #dadce0; z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; color: #5f6368; text-decoration: none; font-size: 11px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .nav-item.active { color: #9b59b6; font-weight: 600; }
+
+        .db-status-container { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; margin-top: 8px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; transition: background-color 0.3s, box-shadow 0.3s; }
+        .status-dot.online { background-color: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+        .status-dot.offline { background-color: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <h1>Au bonheur des Anges</h1>
+    <div class="db-status-container">
+        <span id="statusDot" class="status-dot offline"></span>
+        <span id="statusText" style="color: #e74c3c;">Offline</span>
+    </div>
+</div>
+
+<div class="app-view">
+    <div id="alertSuccess" class="alert-success">
+        &check; Opération réussie !
+    </div>
+
+    <!-- Form Card -->
+    <div class="app-card">
+        <h2 class="section-title" id="formTitle">Ajouter un Produit</h2>
+        <form id="productForm">
+            <input type="hidden" id="editProductId" value="">
+
+            <div class="form-group">
+                <label for="categorie">Catégorie *</label>
+                <select id="categorie" class="form-control" required>
+                    <option value="Sublimation">Sublimation</option>
+                    <option value="Créations 3D">Créations 3D</option>
+                    <option value="Déco pour Noël">Déco pour Noël</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="productNaam">Nom du produit *</label>
+                <input type="text" id="productNaam" class="form-control" placeholder="ex: Mug personnalisé" required>
+            </div>
+
+            <div class="form-group">
+                <label for="productPrijs">Prix (€) *</label>
+                <input type="number" step="0.01" id="productPrijs" class="form-control" placeholder="0.00" required>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Enregistrer le produit
+            </button>
+            <button type="button" class="btn-cancel" id="cancelBtn" onclick="window.resetForm()">
+                Annuler la modification
+            </button>
+        </form>
+    </div>
+
+    <!-- Products Table Card -->
+    <div class="app-card">
+        <div class="section-title">
+            <span>Tous les Produits</span>
+            <button class="btn-seed" onclick="window.seedDefaultProducts()">📥 Importer produits de base</button>
+        </div>
+
+        <div class="filter-container">
+            <label for="filterCategory">Filtrer par catégorie :</label>
+            <select id="filterCategory" class="form-control" style="padding: 6px 10px; font-size: 13px;" onchange="window.renderProductsTable()">
+                <option value="ALL">-- Toutes les catégories --</option>
+                <option value="Sublimation">Sublimation</option>
+                <option value="Créations 3D">Créations 3D</option>
+                <option value="Déco pour Noël">Déco pour Noël</option>
+                <option value="Autre">Autre</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th>Nom</th>
+                        <th>Prix</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #7f8c8d;">Chargement...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <a href="index.html" class="nav-item">📝<br><span>COMMANDER</span></a>
+    <a href="add_product.html" class="nav-item active">➕<br><span>PRODUIT</span></a>
+    <a href="list.html" class="nav-item">📊<br><span>LISTE</span></a>
+    <a href="listcommand.html" class="nav-item">📋<br><span>LISTE PDF</span></a>
+    <a href="infoapp.html" class="nav-item">ℹ️<br><span>INFO</span></a>
+</div>
+
+<!-- Firebase Module -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "JOUW_API_KEY", 
+        authDomain: "cloudstockage-b1580.firebaseapp.com",
+        databaseURL: "https://cloudstockage-b1580-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "cloudstockage-b1580",
+        storageBucket: "cloudstockage-b1580.appspot.com",
+        messagingSenderId: "524333606775",
+        appId: "JOUW_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let allProductsData = {};
+
+    // Connection Status
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+        const statusDot = document.getElementById("statusDot");
+        const statusText = document.getElementById("statusText");
+
+        if (snap.val() === true) {
+            statusDot.className = "status-dot online";
+            statusText.textContent = "Online";
+            statusText.style.color = "#2ecc71";
+        } else {
+            statusDot.className = "status-dot offline";
+            statusText.textContent = "Offline";
+            statusText.style.color = "#e74c3c";
+        }
+    });
+
+    // Fetch and display products in table
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            allProductsData = snapshot.val();
+        } else {
+            allProductsData = {};
+        }
+        window.renderProductsTable();
+    });
+
+    // Render table with category filter
+    window.renderProductsTable = function() {
+        const tbody = document.getElementById("productsTableBody");
+        const selectedCategory = document.getElementById("filterCategory").value;
+        tbody.innerHTML = "";
+
+        const productKeys = Object.keys(allProductsData);
+
+        if (productKeys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #7f8c8d; padding: 15px;">Aucun produit dans la base. Cliquez sur <strong>"Importer produits de base"</strong> ci-dessus !</td></tr>`;
+            return;
+        }
+
+        let filteredKeys = productKeys.filter(key => {
+            if (selectedCategory === "ALL") return true;
+            return (allProductsData[key].categorie || "Autre") === selectedCategory;
+        });
+
+        // Sorteer op Categorie en dan op Naam
+        filteredKeys.sort((a, b) => {
+            const catA = (allProductsData[a].categorie || "").toLowerCase();
+            const catB = (allProductsData[b].categorie || "").toLowerCase();
+            if (catA < catB) return -1;
+            if (catA > catB) return 1;
+
+            const nameA = (allProductsData[a].naam || "").toLowerCase();
+            const nameB = (allProductsData[b].naam || "").toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        if (filteredKeys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #7f8c8d; padding: 15px;">Aucun produit pour cette catégorie.</td></tr>`;
+            return;
+        }
+
+        filteredKeys.forEach(id => {
+            const item = allProductsData[id];
+            const tr = document.createElement("tr");
+
+            const categorie = item.categorie || "Autre";
+            const naam = item.naam || "";
+            const prijs = parseFloat(item.prijs || 0).toFixed(2);
+
+            tr.innerHTML = `
+                <td><span class="badge-cat">${escapeHtml(categorie)}</span></td>
+                <td><strong>${escapeHtml(naam)}</strong></td>
+                <td>${prijs} €</td>
+                <td style="white-space: nowrap;">
+                    <button class="btn-action btn-edit" onclick="window.editProduct('${id}', '${escapeJs(naam)}', '${prijs}', '${escapeJs(categorie)}')">✏️</button>
+                    <button class="btn-action btn-delete" onclick="window.deleteProduct('${id}')">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+
+    // Standaardlijst in één keer importeren in Firebase
+    window.seedDefaultProducts = async function() {
+        if (!confirm("Voulez-vous charger la liste de tous les produits par défaut dans la base de données ?")) {
+            return;
+        }
+
+        const defaultList = [
+            // Sublimation
+            { categorie: "Sublimation", naam: "Tapis souris", prijs: 10.00 },
+            { categorie: "Sublimation", naam: "Photo sur cristal 8x6x2 cm", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Mug", prijs: 8.00 },
+            { categorie: "Sublimation", naam: "Mug couple (2)", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Puzzle A4 + boîte métal", prijs: 13.00 },
+            { categorie: "Sublimation", naam: "Stylo", prijs: 3.50 },
+            { categorie: "Sublimation", naam: "Mug métal 450 ml", prijs: 10.00 },
+            { categorie: "Sublimation", naam: "Bidon métal 750 ml", prijs: 12.00 },
+            { categorie: "Sublimation", naam: "Bouteille métal jaune-vert 500 ml", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Sac ordi 15 pouces", prijs: 20.00 },
+            { categorie: "Sublimation", naam: "Petite ardoise", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Marbre 15x15", prijs: 30.00 },
+            { categorie: "Sublimation", naam: "Grande ardoise", prijs: 30.00 },
+            { categorie: "Sublimation", naam: "Coussin", prijs: 12.00 },
+            { categorie: "Sublimation", naam: "Coussin 40x40 cm", prijs: 12.00 },
+            { categorie: "Sublimation", naam: "Assiette décorative céramique", prijs: 20.00 },
+            { categorie: "Sublimation", naam: "Réveil multicolore", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Réveil 2 photos perso", prijs: 25.00 },
+            { categorie: "Sublimation", naam: "Coque GSM avec photo perso", prijs: 20.00 },
+            { categorie: "Sublimation", naam: "Parchemin A3", prijs: 15.00 },
+            { categorie: "Sublimation", naam: "Sac à courses personnalisé", prijs: 3.00 },
+            { categorie: "Sublimation", naam: "Ours en peluche perso", prijs: 12.00 },
+
+            // Créations 3D
+            { categorie: "Créations 3D", naam: "Statuette d'après photo perso", prijs: 15.00 },
+            { categorie: "Créations 3D", naam: "Plaque souvenir d'après photo", prijs: 35.00 },
+            { categorie: "Créations 3D", naam: "Vase (hauteur 20 cm)", prijs: 15.00 },
+            { categorie: "Créations 3D", naam: "Vase de table 15-18 cm", prijs: 10.00 },
+            { categorie: "Créations 3D", naam: "Porte-clés", prijs: 10.00 },
+            { categorie: "Créations 3D", naam: "Plat à fruits", prijs: 12.00 },
+            { categorie: "Créations 3D", naam: "Porte épice(12 piéces)", prijs: 15.00 },
+            { categorie: "Créations 3D", naam: "Séparateur de jaune d'oeuf", prijs: 4.00 },
+            { categorie: "Créations 3D", naam: "Presse à burger", prijs: 10.00 },
+            { categorie: "Créations 3D", naam: "Moule à raviole", prijs: 10.00 },
+            { categorie: "Créations 3D", naam: "Lampe Lucent 37 cm", prijs: 45.00 },
+            { categorie: "Créations 3D", naam: "Lampe Artichoke 26 cm (Lampe blanche)", prijs: 45.00 },
+            { categorie: "Créations 3D", naam: "Lampe Artichoke 26 cm (Lampe multicolor)", prijs: 48.00 },
+            { categorie: "Créations 3D", naam: "Lampe chat lune usb led (modele perso)", prijs: 17.00 },
+            { categorie: "Créations 3D", naam: "Distribution sac (chien)", prijs: 3.00 },
+            { categorie: "Créations 3D", naam: "Distribution nourriture 19x19x10 cm", prijs: 15.00 },
+            { categorie: "Créations 3D", naam: "Bol chat qui dors", prijs: 10.00 },
+            { categorie: "Créations 3D", naam: "Pot crayon chat", prijs: 7.00 },
+            { categorie: "Créations 3D", naam: "Corbeille papier 24,5 cm", prijs: 12.00 },
+            { categorie: "Créations 3D", naam: "Bol chien woof 21.5 cm", prijs: 15.00 },
+            { categorie: "Créations 3D", naam: "Welcome cochon d'inde", prijs: 5.00 },
+
+            // Déco pour Noël
+            { categorie: "Déco pour Noël", naam: "Boule de Noël 6 cm", prijs: 3.50 },
+            { categorie: "Déco pour Noël", naam: "Boule de Noël 8 cm", prijs: 5.00 },
+            { categorie: "Déco pour Noël", naam: "Déco de Noël", prijs: 6.00 },
+            { categorie: "Déco pour Noël", naam: "Chaussette de Noël", prijs: 10.00 }
+        ];
+
+        try {
+            for (let prod of defaultList) {
+                const newRef = push(productsRef);
+                await set(newRef, { ...prod, timestamp: Date.now() });
+            }
+            showMessage("Tous les produits par défaut ont été importés !");
+        } catch (err) {
+            alert("Erreur lors de l'importation: " + err.message);
+        }
+    };
+
+    // Form Submit (Add or Edit)
+    const form = document.getElementById("productForm");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const editId = document.getElementById("editProductId").value;
+        const categorie = document.getElementById("categorie").value;
+        const naam = document.getElementById("productNaam").value.trim();
+        const prijs = parseFloat(document.getElementById("productPrijs").value) || 0;
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+
+        try {
+            if (editId) {
+                // UPDATE
+                const itemRef = ref(db, `products/${editId}`);
+                await update(itemRef, {
+                    categorie: categorie,
+                    naam: naam,
+                    prijs: prijs
+                });
+                showMessage("Produit mis à jour avec succès !");
+            } else {
+                // ADD
+                const newRef = push(productsRef);
+                await set(newRef, {
+                    categorie: categorie,
+                    naam: naam,
+                    prijs: prijs,
+                    timestamp: Date.now()
+                });
+                showMessage("Nouveau produit ajouté !");
+            }
+
+            window.resetForm();
+        } catch (error) {
+            alert("Erreur: " + error.message);
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Set form to Edit mode
+    window.editProduct = function(id, naam, prijs, categorie) {
+        document.getElementById("editProductId").value = id;
+        document.getElementById("categorie").value = categorie;
+        document.getElementById("productNaam").value = naam;
+        document.getElementById("productPrijs").value = prijs;
+
+        document.getElementById("formTitle").textContent = "Modifier le Produit";
+        document.getElementById("submitBtn").textContent = "Mettre à jour le produit";
+        document.getElementById("cancelBtn").style.display = "block";
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Delete Product
+    window.deleteProduct = async function(id) {
+        if (confirm("Voulez-vous vraiment supprimer ce produit ?")) {
+            try {
+                const itemRef = ref(db, `products/${id}`);
+                await remove(itemRef);
+                showMessage("Produit supprimé !");
+            } catch (error) {
+                alert("Erreur lors de la suppression: " + error.message);
+            }
+        }
+    };
+
+    // Reset Form
+    window.resetForm = function() {
+        form.reset();
+        document.getElementById("editProductId").value = "";
+        document.getElementById("formTitle").textContent = "Ajouter un Produit";
+        document.getElementById("submitBtn").textContent = "Enregistrer le produit";
+        document.getElementById("cancelBtn").style.display = "none";
+    };
+
+    function showMessage(text) {
+        const alertBox = document.getElementById("alertSuccess");
+        alertBox.textContent = "✓ " + text;
+        alertBox.style.display = "block";
+        setTimeout(() => { alertBox.style.display = "none"; }, 3500);
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function escapeJs(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+</script>
+</body>
+</html>

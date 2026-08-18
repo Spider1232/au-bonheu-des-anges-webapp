@@ -33,10 +33,9 @@
         .alert-success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: none; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #dadce0; z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #5f6368; text-decoration: none; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; color: #5f6368; text-decoration: none; font-size: 11px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .nav-item.active { color: #9b59b6; font-weight: 600; }
 
-        /* Nieuwe database status styling */
         .db-status-container { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; margin-top: 8px; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; transition: background-color 0.3s, box-shadow 0.3s; }
         .status-dot.online { background-color: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
@@ -47,14 +46,11 @@
 
 <div class="app-header">
     <h1>Au bonheur des Anges</h1>
-    <!-- Status indicator toegevoegd onder de titel -->
     <div class="db-status-container">
         <span id="statusDot" class="status-dot offline"></span>
-        <span id="statusText" style="color: #e74c3c;">Database Offline</span>
+        <span id="statusText" style="color: #e74c3c;">Offline</span>
     </div>
 </div>
-
-<img src="logo.jpg" alt="Girl in a jacket" style="width:300px;height:300px;">
 
 <div class="app-view">
     <div id="alertSuccess" class="alert-success">
@@ -69,69 +65,10 @@
                 <input type="text" id="naam" class="form-control" placeholder="ex: Marie Dupont" required>
             </div>
 
-            <!-- Categorieën zijn nu gedisabled, zodat ze niet gekozen kunnen worden -->
             <div class="form-group">
-                <label for="text">Choisir un produit prédéfini *</label>
+                <label for="text">Choisir un produit *</label>
                 <select id="text" class="form-control" required onchange="window.updateDefaultPrice()">
-                    <option value="" data-price="">-- Sélectionner un produit --</option>
-
-                    <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Sublimation --</option>
-                    <!-- Sublimation -->
-                    <option value="Tapis souris" data-price="10.00">Tapis souris - 10,00 €</option>
-                    <option value="Photo sur cristal 8x6x2 cm" data-price="15.00">Photo sur cristal 8x6x2 cm - 15,00 €</option>
-                    <option value="Mug" data-price="8.00">Mug - 8,00 €</option>
-                    <option value="Mug couple (2)" data-price="15.00">Mug couple (2) - 15,00 €</option>
-                    <option value="Puzzle A4 + boîte métal" data-price="13.00">Puzzle A4 + boîte métal - 13,00 €</option>
-                    <option value="Stylo" data-price="3.50">Stylo - 3,50 €</option>
-                    <option value="Mug métal 450 ml" data-price="10.00">Mug métal 450 ml - 10,00 €</option>
-                    <option value="Bidon métal 750 ml" data-price="12.00">Bidon métal 750 ml - 12,00 €</option>
-                    <option value="Bouteille métal jaune-vert 500 ml" data-price="15.00">Bouteille métal jaune-vert 500 ml - 15,00 €</option>
-                    <option value="Sac ordi 15 pouces" data-price="20.00">Sac ordi 15 pouces - 20,00 €</option>
-                    <option value="Petite ardoise" data-price="15.00">Petite ardoise - 15,00 €</option>
-                    <option value="Marbre 15x15" data-price="30.00">Marbre 15x15 - 30,00 €</option>
-                    <option value="Grande ardoise" data-price="30.00">Grande ardoise - 30,00 €</option>
-                    <option value="Coussin" data-price="12.00">Coussin - 12,00 €</option>
-                    <option value="Coussin 40x40 cm" data-price="12.00">Coussin 40x40 cm - 12,00 €</option>
-                    <option value="Assiette décorative céramique" data-price="20.00">Assiette décorative céramique - 20,00 €</option>
-                    <option value="Réveil multicolore" data-price="15.00">Réveil multicolore - 15,00 €</option>
-                    <option value="Réveil 2 photos perso" data-price="25.00">Réveil 2 photos perso - 25,00 €</option>
-                    <option value="Coque GSM avec photo perso" data-price="20.00">Coque GSM avec photo perso - 20,00 €</option>
-                    <option value="Parchemin A3" data-price="15.00">Parchemin A3 - 15,00 €</option>
-                    <option value="Sac à courses personnalisé" data-price="3.00">Sac à courses personnalisé - 3,00 €</option>
-                    <option value="Ours en peluche perso" data-price="12.00">Ours en peluche perso - 12,00 €</option>
-                    <!-- Créations 3 D -->
-                    <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Créations 3 D --</option>
-                    <option value="Statuette d'après photo perso" data-price="15.00">Statuette d'après photo perso - 15,00 €</option>
-                    <option value="Plaque souvenir d'après photo" data-price="35.00">Plaque souvenir d'après photo - 35,00 €</option>
-                    <option value="Vase (hauteur 20 cm)" data-price="15.00">Vase (hauteur 20 cm) - 15,00 €</option>
-                    <option value="Vase de table 15-18 cm" data-price="10.00">Vase de table 15-18 cm - 10,00 €</option>
-                    <option value="Porte-clés" data-price="10.00">Porte-clés - 10,00 €</option>
-                    <option value="Plat à fruits" data-price="12.00">Plat à fruits - 12,00 €</option>
-                    <!-- ajoute -->
-                    <option value="Porte épice(12 piéces)" data-price="15.00">Porte épice(12 piéces) - 15.00 €</option>
-                    <option value="Séparateur de jaune d'oeuf" data-price="4.00">Séparateur de jaune d'oeuf - 4.00 €</option>
-                    <option value="Presse à burger" data-price="10.00">Presse à burger - 10.00 €</option>
-                    <option value="Moule à raviole" data-price="10.00">Moule à raviole - 10.00 €</option>
-                    <option value="Lampe Lucent 37 cm" data-price="45.00">Lampe Lucent 37 cm - 45.00 €</option>
-                    <option value="Lampe Artichoke 26 cm (Lampe blanche)" data-price="45.00">Lampe Artichoke 26 cm (Lampe blanche) - 45.00 €</option>
-                    <option value="Lampe Artichoke 26 cm (Lampe multicolor)" data-price="48.00">Lampe Artichoke 26 cm (Lampe multicolor) - 48.00 €</option>
-                    <option value="Lampe chat lune usb led (modele perso)" data-price="17.00">Lampe chat lune usb led (modele perso) - 17.00 €</option>
-                    <option value="Distribution sac (chien)" data-price="3.00">Distribution sac (chien) - 3.00 €</option>
-                    <option value="Distribution nourriture 19x19x10 cm" data-price="15.00">Distribution nourriture 19x19x10 cm - 15.00 €</option>
-                    <option value="Bol chat qui dors" data-price="10.00">Bol chat qui dors - 10.00 €</option>
-                    <option value="Pot crayon chat" data-price="7.00">Pot crayon chat - 7.00 €</option>
-                    <option value="Corbeille papier 24,5 cm" data-price="12.00">Colbeille papier 24,5cm - 12.00 €</option>
-                    <option value="Bol chien woof 21.5 cm" data-price="15.00">Bol chien woof 21.5 cm - 15.00 €</option>
-                    <option value="Welcome cochon d'inde" data-price="5.00">"Welcome cochon d'inde - 5.00 €</option>
-
-                    <!-- Deco pour Noël -->
-                    <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Deco pour Noël --</option>
-                    <option value="Boule de Noël 6 cm" data-price="3.50">Boule de Noël 6 cm - 3,50 €</option>
-                    <option value="Boule de Noël 8 cm" data-price="5.00">Boule de Noël 8 cm - 5,00 €</option>
-                    <option value="Déco de Noël" data-price="6.00">Déco de Noël - 6,00 €</option>
-                    <option value="Chaussette de Noël" data-price="10.00">Chaussette de Noël - 10,00 €</option>
-
-                    
+                    <option value="" data-price="">-- Chargement des produits... --</option>
                 </select>
             </div>
 
@@ -155,7 +92,6 @@
                 <input type="date" id="datum" class="form-control" required>
             </div>
 
-            <!-- Fix voor klikbare checkbox -->
             <div class="form-group">
                 <div class="checkbox-group" onclick="window.toggleCheckbox(event, 'betaald')">
                     <input type="checkbox" id="betaald">
@@ -177,12 +113,11 @@
     <a href="infoapp.html" class="nav-item">ℹ️<br><span>INFO</span></a>
 </div>
 
-<!-- Firebase Scripts met onValue import -->
+<!-- Firebase Scripts -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Vul hier jouw eigen Firebase Keys in
     const firebaseConfig = {
         apiKey: "JOUW_API_KEY", 
         authDomain: "cloudstockage-b1580.firebaseapp.com",
@@ -213,13 +148,55 @@
         }
     });
 
-    // Standaard datum instellen op vandaag
+    // --- PRODUITEN LADEN UIT FIREBASE & GROEPEREN PER CATEGORIE ---
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, (snapshot) => {
+        const selectMenu = document.getElementById("text");
+        selectMenu.innerHTML = '<option value="" data-price="">-- Sélectionner un produit --</option>';
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const categories = {};
+
+            // Groepeer op categorie
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                const cat = item.categorie || "Autre";
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(item);
+            });
+
+            // Bouw de dropdown op met optgroups
+            Object.keys(categories).sort().forEach(catName => {
+                const optGroup = document.createElement("optgroup");
+                optGroup.label = catName;
+
+                // Sorteer op productnaam
+                categories[catName].sort((a,b) => (a.naam || "").localeCompare(b.naam || ""));
+
+                categories[catName].forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.naam;
+                    option.setAttribute("data-price", item.prijs);
+                    const formattedPrice = parseFloat(item.prijs || 0).toFixed(2).replace('.', ',');
+                    option.textContent = `${item.naam} - ${formattedPrice} €`;
+                    optGroup.appendChild(option);
+                });
+
+                selectMenu.appendChild(optGroup);
+            });
+        } else {
+            selectMenu.innerHTML = '<option value="" data-price="">-- Aucun produit trouvé. Importez-les via PRODUIT --</option>';
+        }
+    });
+
+    // Standaard datum op vandaag
     document.addEventListener("DOMContentLoaded", () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById("datum").value = today;
     });
 
-    // Vul automatisch de prijs in wanneer een product gekozen wordt
+    // Vul automatisch de prijs in bij selectie
     window.updateDefaultPrice = function() {
         const selectElement = document.getElementById("text");
         const selectedOption = selectElement.options[selectElement.selectedIndex];
@@ -231,7 +208,7 @@
         }
     };
 
-    // Bereken het totaal live
+    // Live totaalberekening
     window.calculateTotal = function() {
         const aantal = parseInt(document.getElementById("aantal").value) || 0;
         const prijs = parseFloat(document.getElementById("prijs").value) || 0;
@@ -247,7 +224,7 @@
         }
     };
 
-    // Formulier verzenden naar Firebase
+    // Formulier verzenden
     const form = document.getElementById("orderForm");
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -284,12 +261,10 @@
             const newRef = push(itemsRef);
             await set(newRef, newOrder);
 
-            // Succesweergave
             const alertBox = document.getElementById("alertSuccess");
             alertBox.style.display = "block";
             setTimeout(() => { alertBox.style.display = "none"; }, 4000);
 
-            // Formulier resetten
             form.reset();
             document.getElementById("datum").value = new Date().toISOString().split('T')[0];
             document.getElementById("totalAmount").textContent = "0.00";
