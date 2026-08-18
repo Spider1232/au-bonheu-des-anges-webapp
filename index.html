@@ -74,6 +74,9 @@
                 <label for="text">Choisir un produit prédéfini *</label>
                 <select id="text" class="form-control" required onchange="window.updateDefaultPrice()">
                     <option value="" data-price="">-- Sélectionner un produit --</option>
+
+                    <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Sublimation --</option>
+                    <!-- Sublimation -->
                     <option value="Tapis souris" data-price="10.00">Tapis souris - 10,00 €</option>
                     <option value="Photo sur cristal 8x6x2 cm" data-price="15.00">Photo sur cristal 8x6x2 cm - 15,00 €</option>
                     <option value="Mug" data-price="8.00">Mug - 8,00 €</option>
@@ -96,7 +99,7 @@
                     <option value="Parchemin A3" data-price="15.00">Parchemin A3 - 15,00 €</option>
                     <option value="Sac à courses personnalisé" data-price="3.00">Sac à courses personnalisé - 3,00 €</option>
                     <option value="Ours en peluche perso" data-price="12.00">Ours en peluche perso - 12,00 €</option>
-                    
+                    <!-- Créations 3 D -->
                     <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Créations 3 D --</option>
                     <option value="Statuette d'après photo perso" data-price="15.00">Statuette d'après photo perso - 15,00 €</option>
                     <option value="Plaque souvenir d'après photo" data-price="35.00">Plaque souvenir d'après photo - 35,00 €</option>
@@ -104,12 +107,31 @@
                     <option value="Vase de table 15-18 cm" data-price="10.00">Vase de table 15-18 cm - 10,00 €</option>
                     <option value="Porte-clés" data-price="10.00">Porte-clés - 10,00 €</option>
                     <option value="Plat à fruits" data-price="12.00">Plat à fruits - 12,00 €</option>
-                    
+                    <!-- ajoute -->
+                    <option value="Porte épice(12 piéces)" data-price="15.00">Porte épice(12 piéces) - 15.00 €</option>
+                    <option value="Séparateur de jaune d'oeuf" data-price="4.00">Séparateur de jaune d'oeuf - 4.00 €</option>
+                    <option value="Presse à burger" data-price="10.00">Presse à burger - 10.00 €</option>
+                    <option value="Moule à raviole" data-price="10.00">Moule à raviole - 10.00 €</option>
+                    <option value="Lampe Lucent 37 cm" data-price="45.00">Lampe Lucent 37 cm - 45.00 €</option>
+                    <option value="Lampe Artichoke 26 cm (Lampe blanche)" data-price="45.00">Lampe Artichoke 26 cm (Lampe blanche) - 45.00 €</option>
+                    <option value="Lampe Artichoke 26 cm (Lampe multicolor)" data-price="48.00">Lampe Artichoke 26 cm (Lampe multicolor) - 48.00 €</option>
+                    <option value="Lampe chat lune usb led (modele perso)" data-price="17.00">Lampe chat lune usb led (modele perso) - 17.00 €</option>
+                    <option value="Distribution sac (chien)" data-price="3.00">Distribution sac (chien) - 3.00 €</option>
+                    <option value="Distribution nourriture 19x19x10 cm" data-price="15.00">Distribution nourriture 19x19x10 cm - 15.00 €</option>
+                    <option value="Bol chat qui dors" data-price="10.00">Bol chat qui dors - 10.00 €</option>
+                    <option value="Pot crayon chat" data-price="7.00">Pot crayon chat - 7.00 €</option>
+                    <option value="Corbeille papier 24,5 cm" data-price="12.00">Colbeille papier 24,5cm - 12.00 €</option>
+                    <option value="Bol chien woof 21.5 cm" data-price="15.00">Bol chien woof 21.5 cm - 15.00 €</option>
+                    <option value="Welcome cochon d'inde" data-price="5.00">"Welcome cochon d'inde - 5.00 €</option>
+
+                    <!-- Deco pour Noël -->
                     <option value="" disabled style="font-weight: bold; background-color: #fbeef7;">-- Deco pour Noël --</option>
                     <option value="Boule de Noël 6 cm" data-price="3.50">Boule de Noël 6 cm - 3,50 €</option>
                     <option value="Boule de Noël 8 cm" data-price="5.00">Boule de Noël 8 cm - 5,00 €</option>
                     <option value="Déco de Noël" data-price="6.00">Déco de Noël - 6,00 €</option>
                     <option value="Chaussette de Noël" data-price="10.00">Chaussette de Noël - 10,00 €</option>
+
+                    
                 </select>
             </div>
 
@@ -167,7 +189,7 @@
         databaseURL: "https://cloudstockage-b1580-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "cloudstockage-b1580",
         storageBucket: "cloudstockage-b1580.appspot.com",
-        messagingSenderId: "JOUW_SENDER_ID",
+        messagingSenderId: "524333606775",
         appId: "JOUW_APP_ID"
     };
 
