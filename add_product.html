@@ -119,13 +119,17 @@
 
         <!-- Backup / Restore / Seed Tools Bar -->
         <div class="tools-bar">
-
+			<h2 class="section-title">
+            <span>Sauvegarde vers un fichier .JSON </span>
+            </h2>
+			<button class="btn-tool btn-import" onclick="document.getElementById('importFileInput').click()">
+                📂 Importer JSON
+            </button>
+	        	
             <button class="btn-tool btn-export" onclick="window.exportToJson()">
                 💾 Exporter JSON (Backup)
             </button>
-            <button class="btn-tool btn-import" onclick="document.getElementById('importFileInput').click()">
-                📂 Importer JSON
-            </button>
+  
             <!-- Hidden file input for JSON import -->
             <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="window.importFromJson(event)">
         </div>
