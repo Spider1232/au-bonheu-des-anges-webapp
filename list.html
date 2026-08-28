@@ -8,35 +8,71 @@
     <!-- Script voor de generatie van PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 70px; display: flex; flex-direction: column; align-items: center; }
-        .app-header { background-color: #ffffff; width: 100%; text-align: center; padding: 12px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .app-header h1 { font-size: 16px; margin: 0; color: #9b59b6; font-weight: 600; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 80px; display: flex; flex-direction: column; align-items: center; }
+        .app-header { background-color: #ffffff; width: 100%; text-align: center; padding: 14px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+        .app-header h1 { font-size: 17px; margin: 0; color: #9b59b6; font-weight: 700; letter-spacing: 0.3px; }
         .app-view { width: 100%; max-width: 480px; box-sizing: border-box; padding: 16px; }
-        .actions-bar { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; }
-        .search-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: flex; align-items: center; gap: 10px; flex: 1; }
-        .search-input { width: 100%; border: none; font-size: 15px; color: #202124; outline: none; background: transparent; }
-        .btn-pdf { background-color: #9b59b6; color: white; border: none; border-radius: 8px; padding: 0 16px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(155, 89, 182, 0.2); }
-        .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(155, 89, 182, 0.05); width: 100%; box-sizing: border-box; }
-        .section-title { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #7d7f82; margin: 0 0 16px 0; font-weight: 700; border-bottom: 1px solid #fbeef7; padding-bottom: 8px; display: flex; justify-content: space-between; }
-        .counter-badge { background-color: #fbeef7; color: #9b59b6; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-        .list-container { padding: 0; margin: 0; list-style: none; }
-        .list-item { background: #ffffff; border-bottom: 1px solid #fbeef7; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
-        .list-item:last-child { border-bottom: none; }
-        .item-main { flex: 1; }
-        .item-title { font-size: 15px; font-weight: 600; color: #202124; margin-bottom: 3px; }
-        .item-details { font-size: 13px; color: #5f6368; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        
+        .actions-bar { display: flex; gap: 8px; margin-bottom: 16px; width: 100%; }
+        .search-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 10px; padding: 10px 12px; box-shadow: 0 1px 3px rgba(155, 89, 182, 0.05); display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+        .search-input { width: 100%; border: none; font-size: 14px; color: #202124; outline: none; background: transparent; }
+        .btn-action { background-color: #9b59b6; color: white; border: none; border-radius: 10px; padding: 0 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(155, 89, 182, 0.2); white-space: nowrap; flex-shrink: 0; transition: transform 0.1s ease; }
+        .btn-action:active { transform: scale(0.97); }
+        .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .app-card { background: #ffffff; border: 1px solid #f3d6ed; border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(155, 89, 182, 0.08); width: 100%; box-sizing: border-box; }
+        .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; color: #7d7f82; margin: 0 0 16px 0; font-weight: 700; border-bottom: 1px solid #fbeef7; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .counter-badge { background-color: #fbeef7; color: #9b59b6; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+        
+        /* Modernized List Styling */
+        .list-container { padding: 0; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        
+        .list-item { 
+            background: #ffffff; 
+            border: 1px solid #f7e1f3; 
+            border-radius: 12px; 
+            padding: 14px 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .list-item:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 10px rgba(155, 89, 182, 0.1); 
+        }
+
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .item-title { font-size: 16px; font-weight: 700; color: #202124; margin: 0; line-height: 1.3; }
+        .item-price { font-size: 16px; font-weight: 800; color: #9b59b6; white-space: nowrap; }
+
+        .item-description { font-size: 14px; color: #4a4d51; font-weight: 500; margin: 2px 0; }
+
+        .item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; }
+        
+        /* Badges */
+        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .badge-subtle { background-color: #f8f9fa; color: #5f6368; border: 1px solid #e8eaed; }
         .status-paid { background-color: #e6f4ea; color: #137333; }
         .status-unpaid { background-color: #fce8e6; color: #c5221f; }
         .status-refund { background-color: #e8f0fe; color: #1a73e8; }
-        .btn-icon { background: none; border: none; color: #9b59b6; cursor: pointer; font-size: 13px; font-weight: 600; padding: 6px; }
-        .btn-icon-delete { color: #d93025; }
+
+        /* Footer / Actions */
+        .item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 8px; border-top: 1px dashed #fbeef7; }
+        .item-actions { display: flex; gap: 8px; }
+        .btn-card-action { background: #fbeef7; border: none; color: #9b59b6; border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+        .btn-card-action:hover { background: #f3d6ed; }
+        .btn-card-delete { color: #d93025; background: #fce8e6; }
+        .btn-card-delete:hover { background: #fad2cf; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #dadce0; z-index: 1000; }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #5f6368; text-decoration: none; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #9b59b6; font-weight: 600; }
         
         /* Masquer les boutons de modification pour le rendu du fichier PDF */
-        .pdf-hide-actions .item-actions { display: none !important; }
+        .pdf-hide-actions .item-footer { display: none !important; }
+        .pdf-hide-actions .list-item { border: 1px solid #ddd; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -49,10 +85,13 @@
     <div class="actions-bar">
         <div class="search-card">
             <span>🔍</span>
-            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom ou commande..." onkeyup="window.filterItems()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher..." onkeyup="window.filterItems()">
         </div>
-        <button class="btn-pdf" id="pdfBtn" onclick="window.exportToPDF()">
-            <span>📄</span> Créer un PDF
+        <button class="btn-action" id="shareBtn" onclick="window.shareList()">
+            <span>🔗</span> Partager
+        </button>
+        <button class="btn-action" id="pdfBtn" onclick="window.exportToPDF()">
+            <span>📄</span> PDF
         </button>
     </div>
 
@@ -61,7 +100,7 @@
             <span>Liste des commandes</span>
             <span id="orderCount" class="counter-badge">0</span>
         </h2>
-        <div id="loadingText" style="text-align:center; color:#70757a; padding: 10px;">Récupération des données depuis la base de données...</div>
+        <div id="loadingText" style="text-align:center; color:#70757a; padding: 20px 0; font-size: 14px;">Récupération des données depuis la base de données...</div>
         <ul id="itemsList" class="list-container"></ul>
     </div>
 </div>
@@ -136,7 +175,7 @@
         countBadge.textContent = items.length;
 
         if (items.length === 0) {
-            list.innerHTML = '<li style="color: #70757a; font-size: 14px; text-align: center; padding: 20px 0;">Aucune commande trouvée</li>';
+            list.innerHTML = '<li style="color: #70757a; font-size: 14px; text-align: center; padding: 30px 0;">Aucune commande trouvée</li>';
             return;
         }
 
@@ -152,24 +191,31 @@
 
             let refundBadge = '';
             if (item.terugbetaald) {
-                refundBadge = `<span class="status-badge status-refund">Remboursé</span>`;
+                refundBadge = `<span class="badge status-refund">Remboursé</span>`;
             }
 
             li.innerHTML = `
-                <div class="item-main">
-                    <div class="item-title">${escapeHtml(item.naam || 'Inconnu')}</div>
-                    <div class="item-details">
-                        <span><strong>${escapeHtml(item.text || 'Pas de description')}</strong></span>
-                        <span>(${item.aantal || 0}x &bull; €${prijsPerStuk.toFixed(2)})</span>
-                        <span style="color: #9b59b6; font-weight: bold;">Total : €${totaalBedrag}</span>
-                        <span>&bull; ${item.datum || 'N/A'}</span>
-                        <span class="status-badge ${paidClass}">${paidText}</span>
-                        ${refundBadge}
-                    </div>
+                <div class="item-header">
+                    <h3 class="item-title">${escapeHtml(item.naam || 'Inconnu')}</h3>
+                    <div class="item-price">€${totaalBedrag}</div>
                 </div>
-                <div class="item-actions">
-                    <button class="btn-icon" onclick="window.editItem('${item.id}')">Modifier</button>
-                    <button class="btn-icon btn-icon-delete" onclick="window.deleteItem('${item.id}')">Supprimer</button>
+
+                <div class="item-description">
+                    ${escapeHtml(item.text || 'Pas de description')}
+                </div>
+
+                <div class="item-meta">
+                    <span class="badge badge-subtle">${item.aantal || 0}x &bull; €${prijsPerStuk.toFixed(2)}</span>
+                    <span class="badge ${paidClass}">${paidText}</span>
+                    ${refundBadge}
+                </div>
+
+                <div class="item-footer">
+                    <span style="font-size: 11px; color: #70757a;">📅 ${item.datum || 'N/A'}</span>
+                    <div class="item-actions">
+                        <button class="btn-card-action" onclick="window.editItem('${item.id}')">Modifier</button>
+                        <button class="btn-card-action btn-card-delete" onclick="window.deleteItem('${item.id}')">Supprimer</button>
+                    </div>
                 </div>
             `;
             list.appendChild(li);
@@ -226,6 +272,38 @@
             await update(itemRef, updatedData);
         } catch (error) {
             alert("Erreur lors de la mise à jour : " + error.message);
+        }
+    };
+
+    // Partage via Web Share API
+    window.shareList = async function() {
+        const shareData = {
+            title: document.title || 'Au bonheur des Anges',
+            text: 'Consultez la liste des commandes :',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Erreur lors du partage :', err);
+                }
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                const btn = document.getElementById('shareBtn');
+                const originalContent = btn.innerHTML;
+                
+                btn.innerHTML = '<span>✅</span> Copié !';
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                }, 2000);
+            } catch (err) {
+                alert('Copiez ce lien pour partager : ' + window.location.href);
+            }
         }
     };
 
