@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Commander</title>
+    <title>Commander|</title>
     <link rel="icon" href="logo.jpg">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #fbeef7; color: #202124; margin: 0; padding-bottom: 80px; display: flex; flex-direction: column; align-items: center; }
@@ -30,7 +30,11 @@
         .btn-submit { background-color: #9b59b6; color: white; border: none; border-radius: 8px; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3); transition: background-color 0.2s; }
         .btn-submit:active { background-color: #8e44ad; }
 
+        .btn-reset { background-color: #e74c3c; color: white; border: none; border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; transition: background-color 0.2s; }
+        .btn-reset:hover { background-color: #c0392b; }
+
         .alert-success { background-color: #e6f4ea; color: #137333; border: 1px solid #ceead6; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: none; }
+        .alert-info { background-color: #e8f0fe; color: #1a73e8; border: 1px solid #d2e3fc; padding: 10px; border-radius: 8px; font-size: 12px; text-align: center; margin-bottom: 16px; display: none; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); border-top: 1px solid #dadce0; z-index: 1000; }
         .nav-item { flex: 1; text-align: center; padding: 10px 0; color: #5f6368; text-decoration: none; font-size: 11px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -56,6 +60,9 @@
 <div class="app-view">
     <div id="alertSuccess" class="alert-success">
         &check; Commande enregistrée avec succès dans le cloud !
+    </div>
+    <div id="alertRestored" class="alert-info">
+        ℹ️ Données en cours de saisie restaurées.
     </div>
 
     <div class="app-card">
@@ -103,13 +110,13 @@
             <button type="submit" class="btn-submit" id="submitBtn">
                 Enregistrer la commande
             </button>
-         <p></p>
-         <p></p>
-         <p></p>
-         <p></p>
-         <p></p>
-         <p></p>
-         <a href="add_product.html" class="nav-item">➕<br><span>Ajoutez des éléments à la liste ou retirez-les-en.</span></a>
+            
+            <button type="button" class="btn-reset" onclick="window.clearFormDraft()">
+                🗑️ Effacer le brouillon
+            </button>
+
+            <p></p>
+            <a href="add_product.html" class="nav-item">➕<br><span>Ajoutez des éléments à la liste ou retirez-les-en.</span></a>
         </form>
     </div>
 </div>
@@ -156,17 +163,80 @@
         }
     });
 
-    // --- PRODUITEN LADEN UIT FIREBASE & GROEPEREN PER CATEGORIE ---
+    // --- LOCALSTORAGE (AUTOMATISCH OPSLAAN & HERSTELLEN) ---
+    const formFieldIds = ['naam', 'text', 'aantal', 'prijs', 'datum', 'betaald'];
+
+    function saveDraft() {
+        const draft = {
+            naam: document.getElementById('naam').value,
+            text: document.getElementById('text').value,
+            aantal: document.getElementById('aantal').value,
+            prijs: document.getElementById('prijs').value,
+            datum: document.getElementById('datum').value,
+            betaald: document.getElementById('betaald').checked
+        };
+        localStorage.setItem('orderFormDraft', JSON.stringify(draft));
+    }
+
+    function restoreDraft() {
+        const savedData = localStorage.getItem('orderFormDraft');
+        if (!savedData) return;
+
+        try {
+            const draft = JSON.parse(savedData);
+            let restored = false;
+
+            if (draft.naam) { document.getElementById('naam').value = draft.naam; restored = true; }
+            if (draft.aantal) { document.getElementById('aantal').value = draft.aantal; restored = true; }
+            if (draft.prijs) { document.getElementById('prijs').value = draft.prijs; restored = true; }
+            if (draft.datum) { document.getElementById('datum').value = draft.datum; restored = true; }
+            if (draft.betaald !== undefined) { document.getElementById('betaald').checked = draft.betaald; }
+
+            // Selectie instellen nadat producten zijn geladen
+            if (draft.text) {
+                const selectElement = document.getElementById('text');
+                selectElement.value = draft.text;
+            }
+
+            window.calculateTotal();
+
+            if (restored) {
+                const alertRestored = document.getElementById("alertRestored");
+                alertRestored.style.display = "block";
+                setTimeout(() => { alertRestored.style.display = "none"; }, 3000);
+            }
+        } catch (e) {
+            console.error("Fout bij het laden van brouillon", e);
+        }
+    }
+
+    window.clearFormDraft = function() {
+        localStorage.removeItem('orderFormDraft');
+        document.getElementById("orderForm").reset();
+        document.getElementById("datum").value = new Date().toISOString().split('T')[0];
+        document.getElementById("totalAmount").textContent = "0.00";
+    };
+
+    // Luister naar wijzigingen in de velden om op te slaan
+    formFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', saveDraft);
+            el.addEventListener('change', saveDraft);
+        }
+    });
+
+    // --- PRODUITEN LADEN UIT FIREBASE ---
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const selectMenu = document.getElementById("text");
+        const currentSelection = selectMenu.value;
         selectMenu.innerHTML = '<option value="" data-price="">-- Sélectionner un produit --</option>';
 
         if (snapshot.exists()) {
             const data = snapshot.val();
             const categories = {};
 
-            // Groepeer op categorie
             Object.keys(data).forEach(key => {
                 const item = data[key];
                 const cat = item.categorie || "Autre";
@@ -174,12 +244,10 @@
                 categories[cat].push(item);
             });
 
-            // Bouw de dropdown op met optgroups
             Object.keys(categories).sort().forEach(catName => {
                 const optGroup = document.createElement("optgroup");
                 optGroup.label = catName;
 
-                // Sorteer op productnaam
                 categories[catName].sort((a,b) => (a.naam || "").localeCompare(b.naam || ""));
 
                 categories[catName].forEach(item => {
@@ -193,15 +261,20 @@
 
                 selectMenu.appendChild(optGroup);
             });
+
+            // Herstel conceptdata na het vullen van de lijst
+            restoreDraft();
         } else {
             selectMenu.innerHTML = '<option value="" data-price="">-- Aucun produit trouvé. Importez-les via PRODUIT --</option>';
         }
     });
 
-    // Standaard datum op vandaag
+    // Standaard datum op vandaag instellen als er geen concept is
     document.addEventListener("DOMContentLoaded", () => {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById("datum").value = today;
+        if (!localStorage.getItem('orderFormDraft')) {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("datum").value = today;
+        }
     });
 
     // Vul automatisch de prijs in bij selectie
@@ -214,6 +287,7 @@
             document.getElementById("prijs").value = defaultPrice;
             window.calculateTotal();
         }
+        saveDraft();
     };
 
     // Live totaalberekening
@@ -230,6 +304,7 @@
         if (e && e.target !== checkbox) {
             checkbox.checked = !checkbox.checked;
         }
+        saveDraft();
     };
 
     // Formulier verzenden
@@ -273,9 +348,8 @@
             alertBox.style.display = "block";
             setTimeout(() => { alertBox.style.display = "none"; }, 4000);
 
-            form.reset();
-            document.getElementById("datum").value = new Date().toISOString().split('T')[0];
-            document.getElementById("totalAmount").textContent = "0.00";
+            // Brouillon wissen na succesvol versturen
+            window.clearFormDraft();
 
         } catch (error) {
             alert("Erreur lors de l'enregistrement : " + error.message);
